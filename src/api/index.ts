@@ -1,5 +1,5 @@
-import { createApi } from "./core/createApi";
-import { Contact, NewContact, contact, db, eq } from "./db";
+import { createApi } from "~/core/createApi";
+import { Contact, NewContact, contact, db, eq } from "~/db";
 
 type CreateContactInput = Pick<Contact, "name" | "email">;
 type UpdateContactInput = Pick<NewContact, "name" | "email">;

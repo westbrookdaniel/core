@@ -1,6 +1,6 @@
-import { define, route, view, z } from "../core";
-import { Layout } from "../layout";
-import { newState } from "../state";
+import { define, route, view, z } from "~/core";
+import { Layout } from "~/components/layout";
+import { newState } from "~/state";
 
 const state = newState<number>("counter:count", { default: 0 });
 

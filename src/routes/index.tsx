@@ -1,7 +1,7 @@
-import { view, route, define, z } from "../core";
-import { api } from "../api";
-import { newObjectState } from "../state";
-import { Layout } from "../layout";
+import { view, route, define, z } from "~/core";
+import { api } from "~/api";
+import { newObjectState } from "~/state";
+import { Layout } from "~/components/layout";
 
 type FieldErrors = Record<string, string[] | undefined>;
 const fieldErrors = newObjectState<FieldErrors>("home:errors", { default: {} });
