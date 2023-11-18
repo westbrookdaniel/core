@@ -12,14 +12,14 @@ export const api = createApi({
         where: eq(contact.id, id),
       });
     },
-    create: async (input: CreateContactInput): Promise<Contact> => {
+    create: async (input: CreateContactInput) => {
       const newContacts: Contact[] = await db
         .insert(contact)
         .values({ ...input, updatedAt: new Date() })
         .returning();
       return newContacts[0];
     },
-    update: async (id: number, input: UpdateContactInput): Promise<Contact> => {
+    update: async (id: number, input: UpdateContactInput) => {
       const newContacts: Contact[] = await db
         .update(contact)
         .set({ ...input, updatedAt: new Date() })
