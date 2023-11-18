@@ -1,4 +1,4 @@
-import { view, route, define } from "../core";
+import { view, route, define, z } from "../core";
 import { api } from "../api";
 import { state } from "../state";
 import { Layout } from "../layout";
@@ -21,11 +21,15 @@ const home = view("/", async () => {
       >
         <label for="name">
           <input type="text" name="name" placeholder="Name" />
-          {errors.name ? <span class="red">{errors.name}</span> : null}
+          {errors.name ? (
+            <span class="red">{errors.name.join(", ")}</span>
+          ) : null}
         </label>
         <label for="email">
           <input type="text" name="email" placeholder="Email" />
-          {errors.email ? <span class="red">{errors.email}</span> : null}
+          {errors.email ? (
+            <span class="red">{errors.email.join(", ")}</span>
+          ) : null}
         </label>
         <button type="submit">Add</button>
       </form>
@@ -42,24 +46,20 @@ const home = view("/", async () => {
   );
 });
 
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email").min(1, "Email is required"),
+});
+
 const createContact = route("POST", "/p/contacts", async (req) => {
-  const form = await req.formData();
-  const name = form.get("name");
-  const email = form.get("email");
+  const form = Object.fromEntries(await req.formData());
+  const opt = formSchema.safeParse(form);
 
-  if (typeof name !== "string" || !name) {
-    await state.home.errors.setKey("name", "Name is required");
-  }
-  if (typeof email !== "string" || !email) {
-    await state.home.errors.setKey("email", "Email is required");
+  if (!opt.success) {
+    return await state.home.errors.set(opt.error.flatten().fieldErrors);
   }
 
-  if (await state.home.errors.hasKeys()) return;
-
-  await api.contacts.create({
-    name: name as string,
-    email: email as string,
-  });
+  await api.contacts.create(opt.data);
 });
 
 export default define({

@@ -1,6 +1,6 @@
 import consola from "consola";
-import { handle, serve, Method, matchOn } from "./server.ts";
-import { renderToString, VNode } from "@westbrookdaniel/palm";
+import { handle, serve, Method, matchOn } from "./server";
+import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
 const MODE = modeArg ?? "dev";
@@ -10,7 +10,9 @@ if (!["dev", "serve"].includes(MODE)) {
   process.exit(1);
 }
 
-type ViewHandler = (params: Record<string, string>) => VNode | Promise<VNode>;
+type ViewHandler = (
+  params: Record<string, string>,
+) => HtmlEscapedString | Promise<HtmlEscapedString>;
 type RouteHandler = (
   req: Request,
   params: Record<string, string>,
@@ -92,12 +94,12 @@ export async function run(defs: Def[]) {
         const resOption = await matchingRoute.handler(req, params);
         if (resOption) return resOption;
 
-        const html = await renderToString(() => viewHandler(params));
+        const html = await viewHandler(params);
         return respond("<!doctype html>" + html);
       });
     } else {
       handle(method, pathname, async (_req, params) => {
-        const html = await renderToString(() => viewHandler(params));
+        const html = await viewHandler(params);
         return respond("<!doctype html>" + html);
       });
     }
@@ -110,7 +112,7 @@ export async function run(defs: Def[]) {
       const referer = req.headers.get("Referer");
       if (referer) {
         const view = new URL(referer).pathname;
-        return Response.redirect(view);
+        return Response.redirect(view, 301);
       }
       consola.error(
         "No referer, view, or response found for route: ",

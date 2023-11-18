@@ -1,4 +1,4 @@
-import { define, route, view } from "../core";
+import { define, route, view, z } from "../core";
 import { Layout } from "../layout";
 import { state } from "../state";
 
@@ -41,10 +41,12 @@ const counter = view("/counter", async () => {
   );
 });
 
+const bodySchema = z.object({ count: z.number() });
+
 const saveCounter = route("POST", "/p/counter", async (req) => {
-  const data = await req.json();
-  if (typeof data.count !== "number") return;
-  await state.counter.count.set(data.count);
+  const opt = bodySchema.safeParse(await req.json());
+  if (!opt.success) return;
+  await state.counter.count.set(opt.data.count);
 });
 
 export default define({
