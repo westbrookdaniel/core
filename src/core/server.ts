@@ -27,7 +27,7 @@ export function matchOn<T>(routes: [Method, string, T][]) {
     index: number;
   }>();
   for (let i = 0; i < routes.length; i++) {
-    const [method, pathname, handler] = routes[i]!;
+    const [method, pathname, handler] = routes[i];
     matchRouter.insert(pathname, { handler, method, index: i });
   }
   return (pathname: string, method: string) => {
