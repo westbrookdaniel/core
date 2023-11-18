@@ -1,7 +1,7 @@
 # core
 
-My server first Bun js/ts framework/template.
+Server first Bun typescript framework/template
 
 Quite a light framework, but packed with a utilities
 and patterns for making backend first development easier
-especially with frameworks like htmx.
+especially with frameworks like htmx
