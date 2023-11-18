@@ -1,8 +1,8 @@
-import { include, Children } from "./core";
+import { include, Child } from "./core";
 
 include("https://unpkg.com/htmx.org@1.9.8", { type: "module" });
 
-export function Layout({ children }: { children: Children }) {
+export function Layout({ children }: { children: Child }) {
   return (
     <html lang="en">
       <head>

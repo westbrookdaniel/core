@@ -1,10 +1,12 @@
 import { define, route, view, z } from "../core";
 import { Layout } from "../layout";
-import { state } from "../state";
+import { newState } from "../state";
+
+const state = newState<number>("counter:count", { default: 0 });
 
 const counter = view("/counter", async () => {
   const id = Math.random().toString(36).substring(2);
-  const count = await state.counter.count.get();
+  const count = await state.get();
   return (
     <Layout>
       <h1>Counter</h1>
@@ -12,10 +14,12 @@ const counter = view("/counter", async () => {
       <button onclick="dec()">Decrement</button>
       <button onclick="save()">Save</button>
       <span style="margin-left: 8px" id={id}>
-        {count}
+        {count.toString()}
       </span>
 
-      <script>{`
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
         count = ${count};
 
         function inc() {
@@ -35,8 +39,9 @@ const counter = view("/counter", async () => {
             method: "POST",
             body: JSON.stringify({ count }),
           });
-        }
-    `}</script>
+        }`,
+        }}
+      />
     </Layout>
   );
 });
@@ -46,7 +51,7 @@ const bodySchema = z.object({ count: z.number() });
 const saveCounter = route("POST", "/p/counter", async (req) => {
   const opt = bodySchema.safeParse(await req.json());
   if (!opt.success) return;
-  await state.counter.count.set(opt.data.count);
+  await state.set(opt.data.count);
 });
 
 export default define({

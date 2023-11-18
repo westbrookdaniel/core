@@ -1,13 +1,16 @@
 import { view, route, define, z } from "../core";
 import { api } from "../api";
-import { state } from "../state";
+import { newObjectState, newState } from "../state";
 import { Layout } from "../layout";
+
+type FieldErrors = Record<string, string[] | undefined>;
+const fieldErrors = newObjectState<FieldErrors>("home:errors", { default: {} });
 
 const home = view("/", async () => {
   const { data: contacts } = await api.contacts.getAll();
 
-  const errors = await state.home.errors.get();
-  state.home.errors.remove();
+  const errors = await fieldErrors.get();
+  fieldErrors.remove();
 
   if (!contacts) throw new Error("Contacts not found");
 
@@ -56,7 +59,7 @@ const createContact = route("POST", "/p/contacts", async (req) => {
   const opt = formSchema.safeParse(form);
 
   if (!opt.success) {
-    return await state.home.errors.set(opt.error.flatten().fieldErrors);
+    return await fieldErrors.set(opt.error.flatten().fieldErrors);
   }
 
   await api.contacts.create(opt.data);
