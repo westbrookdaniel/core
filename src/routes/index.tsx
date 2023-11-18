@@ -1,6 +1,6 @@
 import { view, route, define, z } from "../core";
 import { api } from "../api";
-import { newObjectState, newState } from "../state";
+import { newObjectState } from "../state";
 import { Layout } from "../layout";
 
 type FieldErrors = Record<string, string[] | undefined>;
