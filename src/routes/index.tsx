@@ -25,11 +25,6 @@ const home = view("/", async () => {
             Server Count {c.toString()}
           </button>
         </form>
-        <form method="POST">
-          <button class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500">
-            Greet
-          </button>
-        </form>
       </main>
     </Layout>
   );
