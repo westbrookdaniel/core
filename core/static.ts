@@ -6,9 +6,13 @@ export function serveStatic(
   transformer: (pathname: string) => string,
 ) {
   const pathname = new URL(req.url).pathname;
-  console.log(pathname);
   if (pathname.match(matcher)) {
-    const file = path.join(process.cwd(), transformer(pathname));
-    return new Response(Bun.file(file).stream());
+    try {
+      const file = path.join(process.cwd(), transformer(pathname));
+      return new Response(Bun.file(file).stream());
+    } catch (e) {
+      console.error(e);
+      return new Response("File not found", { status: 404 });
+    }
   }
 }
