@@ -1,4 +1,4 @@
-import { createApi } from "~/core/createApi";
+import { createApi } from "core";
 import { Contact, NewContact, contact, db, eq } from "~/db";
 
 type CreateContactInput = Pick<Contact, "name" | "email">;

@@ -1,4 +1,4 @@
-import { view, route, define } from "~/core";
+import { view, route, define } from "core";
 import { memory } from "~/state";
 import { Layout } from "~/components/layout";
 

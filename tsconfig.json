@@ -10,7 +10,7 @@
     "strict": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "~/core/jsx",
+    "jsxImportSource": "core/jsx",
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
@@ -18,9 +18,10 @@
     "types": [
       "bun-types" // add Bun global
     ],
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "~/*": ["./*"]
+      "~/*": ["./src/*"],
+      "core/*": ["./core/*"]
     }
   }
 }

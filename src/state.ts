@@ -1,3 +1,3 @@
-import { createState } from "./core";
+import { createState } from "core";
 
 export const memory = createState();

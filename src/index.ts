@@ -1,5 +1,5 @@
 import path from "path";
-import { run } from "~/core";
+import { run } from "core";
 
 import "~/db";
 

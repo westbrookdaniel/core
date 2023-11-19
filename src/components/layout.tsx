@@ -1,4 +1,4 @@
-import { Child } from "~/core";
+import { Child } from "core";
 
 export function Layout({ children }: { children: Child }) {
   return (
