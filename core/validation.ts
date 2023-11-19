@@ -6,6 +6,7 @@ type FormRouteHandler<I, O> = (
   req: Request,
   params: Record<string, string>,
   opt: z.SafeParseReturnType<I, O>,
+  raw: Record<string, any>,
 ) => Response | Promise<Response> | void | Promise<void>;
 
 export function formRoute<I>(
@@ -15,8 +16,9 @@ export function formRoute<I>(
   formRouteHandler: FormRouteHandler<I, I>,
 ): Route {
   const routeHandler: RouteHandler = async (req, params) => {
-    const data = zodSchema.safeParse(Object.fromEntries(await req.formData()));
-    return formRouteHandler(req, params, data);
+    const raw = Object.fromEntries(await req.formData());
+    const data = zodSchema.safeParse(raw);
+    return formRouteHandler(req, params, data, raw);
   };
 
   return [method, pathname, routeHandler];
@@ -29,8 +31,9 @@ export function jsonRoute<I>(
   formRouteHandler: FormRouteHandler<I, I>,
 ): Route {
   const routeHandler: RouteHandler = async (req, params) => {
-    const data = zodSchema.safeParse(Object.fromEntries(await req.json()));
-    return formRouteHandler(req, params, data);
+    const raw = Object.fromEntries(await req.json());
+    const data = zodSchema.safeParse(raw);
+    return formRouteHandler(req, params, data, raw);
   };
 
   return [method, pathname, routeHandler];
