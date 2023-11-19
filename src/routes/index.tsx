@@ -1,71 +1,40 @@
-import { view, route, define, z } from "~/core";
-import { api } from "~/api";
-import { newObjectState } from "~/state";
+import { view, route, define } from "~/core";
+import { memory } from "~/state";
 import { Layout } from "~/components/layout";
 
-type FieldErrors = Record<string, string[] | undefined>;
-const fieldErrors = newObjectState<FieldErrors>("home:errors", { default: {} });
+const count = memory.newState<number>("home:count", { default: 0 });
 
 const home = view("/", async () => {
-  const { data: contacts } = await api.contacts.getAll();
-
-  const errors = await fieldErrors.get();
-  fieldErrors.remove();
-
-  if (!contacts) throw new Error("Contacts not found");
+  const c = await count.get();
 
   return (
     <Layout>
-      <h1>Contacts</h1>
-      <form
-        action="/p/contacts"
-        method="POST"
-        style="display: flex; flex-direction: column; align-items: flex-start;"
-      >
-        <label for="name">
-          <input type="text" name="name" placeholder="Name" />
-          {errors.name ? (
-            <span class="red">{errors.name.join(", ")}</span>
-          ) : null}
-        </label>
-        <label for="email">
-          <input type="text" name="email" placeholder="Email" />
-          {errors.email ? (
-            <span class="red">{errors.email.join(", ")}</span>
-          ) : null}
-        </label>
-        <button type="submit">Add</button>
-      </form>
-      <ul>
-        {contacts.map((contact) => (
-          <li>
-            <p>
-              {contact.name}: {contact.email}
-            </p>
-          </li>
-        ))}
-      </ul>
+      <main class="h-screen w-screen grid place-content-center text-center bg-neutral-800 text-neutral-400">
+        <h1 class="text-8xl font-thin mb-6">Welcome to Core</h1>
+        <p class="mb-4">A simple framework for server based web apps</p>
+        <form action="/inc" method="POST" class="space-x-2">
+          <button
+            is="count-button"
+            count={0}
+            type="button"
+            class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500"
+          >
+            Client Count 0
+          </button>
+          <button class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500">
+            Server Count {c.toString()}
+          </button>
+        </form>
+      </main>
     </Layout>
   );
 });
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email").min(1, "Email is required"),
-});
-
-const createContact = route("POST", "/p/contacts", async (req) => {
-  const form = Object.fromEntries(await req.formData());
-  const opt = formSchema.safeParse(form);
-
-  if (!opt.success) {
-    return await fieldErrors.set(opt.error.flatten().fieldErrors);
-  }
-
-  await api.contacts.create(opt.data);
+const incCount = route("POST", "/inc", async () => {
+  await count.set((c) => c + 1);
 });
 
 export default define({
   view: home,
-  routes: [createContact],
+  routes: [incCount],
 });

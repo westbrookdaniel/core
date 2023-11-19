@@ -2,6 +2,7 @@
 
 .env 
 postgres-data
+build/styles.css
 
 # Logs
 

@@ -52,9 +52,17 @@ const notFound = {
   params: {},
 };
 
-export function serve() {
+export type Intercept = (
+  req: Request,
+) => void | Response | Promise<void | Response>;
+
+export function serve(intercept?: Intercept) {
   const app = Bun.serve({
     async fetch(req) {
+      if (intercept) {
+        const res = await intercept(req);
+        if (res) return res;
+      }
       const pathname = new URL(req.url).pathname;
       const msg = `${colors.dim(req.method.padEnd(7))} ${pathname}`;
       console.time(msg);

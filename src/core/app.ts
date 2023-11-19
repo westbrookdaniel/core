@@ -1,9 +1,9 @@
 import consola from "consola";
-import { handle, serve, Method, matchOn } from "./server";
+import { handle, serve, Method, matchOn, Intercept } from "./server";
 import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
-const MODE = modeArg ?? "dev";
+export const MODE: "dev" | "serve" = (modeArg ?? "dev") as any;
 if (!["dev", "serve"].includes(MODE)) {
   consola.error("Invalid argument:", modeArg);
   consola.log("Expected: dev or serve\n");
@@ -26,6 +26,7 @@ type Def = { view: View; routes?: Route[] };
 
 const included: [string, IncludeAttr][] = [];
 
+// TODO: This should build the file
 export function include(filePath: string, attributes?: IncludeAttr) {
   if (
     included.find(([fp, a]) => fp === filePath && shallowEqual(a, attributes))
@@ -71,7 +72,7 @@ function respond(html: string) {
   });
 }
 
-export async function run(defs: Def[]) {
+export async function run(defs: Def[], intercept?: Intercept) {
   consola.start("Starting server...");
 
   const views: View[] = [];
@@ -123,7 +124,7 @@ export async function run(defs: Def[]) {
     });
   });
 
-  serve();
+  serve(intercept);
 }
 
 function shallowEqual(a: any, b: any): boolean {
