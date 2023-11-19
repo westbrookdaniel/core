@@ -1,19 +1,25 @@
-import { run, serveStatic } from "core";
+import { createServer, serveStatic } from "core";
 
 import "~/db";
 
 import home from "~/routes/index";
 
-run([home], async (req) => {
-  const build = serveStatic(req, /^\/_static/, (p) =>
-    p.replace("_static", "build"),
-  );
+const serve = await createServer([home]);
 
-  if (build) return build;
+Bun.serve({
+  async fetch(req) {
+    const build = serveStatic(req, /^\/_static/, (p) =>
+      p.replace("_static", "build"),
+    );
 
-  const pub = serveStatic(req, /^\/_public/, (p) =>
-    p.replace("_public", "public"),
-  );
+    if (build) return build;
 
-  if (pub) return pub;
+    const pub = serveStatic(req, /^\/_public/, (p) =>
+      p.replace("_public", "public"),
+    );
+
+    if (pub) return pub;
+
+    return serve(req);
+  },
 });

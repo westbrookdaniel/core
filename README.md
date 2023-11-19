@@ -41,12 +41,16 @@ export default define({
 and registered in the entry point: (what you run with `bun --watch run ...`)
 
 ```tsx
-import { run } from "core";
+import { createServer } from "core";
 
-import home from "~/routes/index";
+import routeDef from "~/routes/path/to/route";
 
-run([home], (req) => {
-  // This is an optional handler for intercepting requests
+const serve = await createServer([routeDef]);
+
+Bun.serve({
+  async fetch(req) {
+    return serve(req);
+  },
 });
 ```
 
@@ -63,7 +67,7 @@ This is a short list main of the utilities included:
 - createState (wrapper of unstorage)
 - createApi (object based api with error/data result type)
 - jsx (while views can return a Response, it's recommended to use jsx)
-- serveStatic (can be used in run's intercept to serve a directory)
+- serveStatic (will serve a directory)
 
 ## Recomendations
 
@@ -77,4 +81,4 @@ specific code like so:
   - components
 ```
 
-Use drizzle (as well as unstorage), it's pretty good. Also we include consola to make logs look a little nicer.
+Use drizzle (as well as unstorage), it's pretty good.

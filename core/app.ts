@@ -1,12 +1,11 @@
-import consola from "consola";
 import { handleRoute, handleView, serve, Method, Intercept } from "./server";
 import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
 export const MODE: "dev" | "serve" = (modeArg ?? "dev") as any;
 if (!["dev", "serve"].includes(MODE)) {
-  consola.error("Invalid argument:", modeArg);
-  consola.log("Expected: dev or serve\n");
+  console.error("Invalid argument:", modeArg);
+  console.log("Expected: dev or serve\n");
   process.exit(1);
 }
 
@@ -76,8 +75,8 @@ function returnHtml(html: string) {
   });
 }
 
-export async function run(defs: Def[], intercept?: Intercept) {
-  consola.start("Starting server...");
+export async function createServer(defs: Def[]) {
+  console.log("Starting server...");
 
   const views: View[] = [];
   const routes: Route[] = [];
@@ -99,7 +98,7 @@ export async function run(defs: Def[], intercept?: Intercept) {
     handleRoute(method, pathname, routeHandler);
   });
 
-  serve(intercept);
+  return (req: Request) => serve(req);
 }
 
 function shallowEqual(a: any, b: any): boolean {
