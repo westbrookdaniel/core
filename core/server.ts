@@ -83,7 +83,6 @@ export function serve(intercept?: Intercept) {
       const referer = req.headers.get("Referer");
       if (referer) {
         const view = new URL(referer).pathname;
-        console.log(view, pathname);
         return Response.redirect(view, 301);
       }
 

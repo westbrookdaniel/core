@@ -12,7 +12,11 @@ if (!["dev", "serve"].includes(MODE)) {
 
 type ViewHandler = (
   params: Record<string, string>,
-) => HtmlEscapedString | Promise<HtmlEscapedString>;
+) =>
+  | HtmlEscapedString
+  | Promise<HtmlEscapedString>
+  | Response
+  | Promise<Response>;
 type RouteHandler = (
   req: Request,
   params: Record<string, string>,
@@ -52,7 +56,7 @@ export function define(def: Def): Def {
   return def;
 }
 
-function respond(html: string) {
+function returnHtml(html: string) {
   let str = html;
   included.forEach(([mod, attributes]) => {
     const src = mod;
@@ -86,7 +90,8 @@ export async function run(defs: Def[], intercept?: Intercept) {
   views.forEach(([pathname, viewHandler]) => {
     handleView(pathname, async (_req, params) => {
       const html = await viewHandler(params);
-      return respond("<!doctype html>" + html);
+      if (html instanceof Response) return html;
+      return returnHtml("<!doctype html>" + html);
     });
   });
 

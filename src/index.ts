@@ -1,23 +1,19 @@
-import path from "path";
-import { run } from "core";
+import { run, serveStatic } from "core";
 
 import "~/db";
 
 import home from "~/routes/index";
 
 run([home], async (req) => {
-  const pathname = new URL(req.url).pathname;
+  const build = serveStatic(req, /^\/_static/, (p) =>
+    p.replace("_static", "build"),
+  );
 
-  if (pathname.startsWith("/_static")) {
-    const file = path.join(process.cwd(), pathname.replace("_static", "build"));
-    return new Response(Bun.file(file).stream());
-  }
+  if (build) return build;
 
-  if (pathname.startsWith("/_public")) {
-    const file = path.join(
-      process.cwd(),
-      pathname.replace("_public", "public"),
-    );
-    return new Response(Bun.file(file).stream());
-  }
+  const pub = serveStatic(req, /^\/_public/, (p) =>
+    p.replace("_public", "public"),
+  );
+
+  if (pub) return pub;
 });

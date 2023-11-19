@@ -1,4 +1,3 @@
-import { silent } from "core";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
@@ -12,6 +11,4 @@ export const db = drizzle(sql, { schema });
 export * from "drizzle-orm";
 export * from "./schema";
 
-await silent(async () => {
-  await migrate(db, { migrationsFolder: "drizzle" });
-});
+await migrate(db, { migrationsFolder: "drizzle" });
