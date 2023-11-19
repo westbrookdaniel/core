@@ -18,39 +18,34 @@ export type Handler = (
   params: Record<string, string>,
 ) => Promise<Response> | Response;
 
-const router = createRouter<{ method: Method; handler: Handler }>();
+export type RouteHandler = (
+  req: Request,
+  params: Record<string, string>,
+) => Promise<Response> | Response | void | Promise<void>;
 
-export function matchOn<T>(routes: [Method, string, T][]) {
-  const matchRouter = createRouter<{
-    handler: T;
-    method: Method;
-    index: number;
-  }>();
-  for (let i = 0; i < routes.length; i++) {
-    const [method, pathname, handler] = routes[i];
-    matchRouter.insert(pathname, { handler, method, index: i });
-  }
-  return (pathname: string, method: string) => {
-    const m = matchRouter.lookup(pathname);
-    if (!m || m.method !== method) return null;
-    return { ...m, params: m.params || {} };
-  };
-}
+// Map from Method to Handler (typed as string for convenience)
+const viewRouter = createRouter<{ handler: Handler }>();
+const router = createRouter<{ handlers: Record<string, RouteHandler> }>();
 
-export function match(pathname: string, method: string) {
+export function matchRoute(pathname: string, method: string) {
   const m = router.lookup(pathname);
-  if (!m || m.method !== method) return null;
-  return { ...m, params: m.params || {} };
+  if (!m || !m.handlers[method]) return null;
+  return { handler: m.handlers[method], params: m.params || {} };
 }
 
-export function handle(method: Method, pathname: string, handler: Handler) {
-  router.insert(pathname, { method, handler });
+export function handleView(pathname: string, handler: Handler) {
+  viewRouter.insert(pathname, { handler });
 }
 
-const notFound = {
-  handler: () => new Response("Not Found", { status: 404 }),
-  params: {},
-};
+export function handleRoute(
+  method: Method,
+  pathname: string,
+  handler: RouteHandler,
+) {
+  const m = router.lookup(pathname);
+  if (!m) return router.insert(pathname, { handlers: { [method]: handler } });
+  m.handlers[method] = handler;
+}
 
 export type Intercept = (
   req: Request,
@@ -59,17 +54,40 @@ export type Intercept = (
 export function serve(intercept?: Intercept) {
   const app = Bun.serve({
     async fetch(req) {
-      if (intercept) {
-        const res = await intercept(req);
-        if (res) return res;
-      }
       const pathname = new URL(req.url).pathname;
       const msg = `${colors.dim(req.method.padEnd(7))} ${pathname}`;
       console.time(msg);
-      const { handler, params } = match(pathname, req.method) || notFound;
-      const res = await handler(req, params);
-      console.timeEnd(msg);
-      return res;
+
+      if (intercept) {
+        const res = await intercept(req);
+        if (res) {
+          console.timeEnd(msg);
+          return res;
+        }
+      }
+
+      const routeMatch = matchRoute(pathname, req.method);
+      const res = await routeMatch?.handler(req, routeMatch.params);
+      if (res) {
+        console.timeEnd(msg);
+        return res;
+      }
+
+      const viewMatch = viewRouter.lookup(pathname);
+      const viewRes = await viewMatch?.handler(req, viewMatch.params!);
+      if (viewRes) {
+        console.timeEnd(msg);
+        return viewRes;
+      }
+
+      const referer = req.headers.get("Referer");
+      if (referer) {
+        const view = new URL(referer).pathname;
+        console.log(view, pathname);
+        return Response.redirect(view, 301);
+      }
+
+      return new Response("Not Found", { status: 404 });
     },
   });
 

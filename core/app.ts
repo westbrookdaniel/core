@@ -1,5 +1,5 @@
 import consola from "consola";
-import { handle, serve, Method, matchOn, Intercept } from "./server";
+import { handleRoute, handleView, serve, Method, Intercept } from "./server";
 import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
@@ -20,7 +20,7 @@ type RouteHandler = (
 
 type IncludeAttr = Record<string, string> | undefined;
 
-type View = [Method, string, ViewHandler];
+type View = [string, ViewHandler];
 type Route = [Method, string, RouteHandler];
 type Def = { view: View; routes?: Route[] };
 
@@ -37,7 +37,7 @@ export function include(filePath: string, attributes?: IncludeAttr) {
 }
 
 export function view(pathname: string, viewHandler: ViewHandler): View {
-  return ["GET", pathname, viewHandler];
+  return [pathname, viewHandler];
 }
 
 export function route(
@@ -83,45 +83,15 @@ export async function run(defs: Def[], intercept?: Intercept) {
     if (def.routes) routes.push(...def.routes);
   }
 
-  const match = matchOn(routes);
-
-  views.forEach(([method, pathname, viewHandler]) => {
-    const matchingRoute = match(method, pathname);
-
-    if (matchingRoute) {
-      routes.splice(matchingRoute.index, 1);
-
-      handle(method, pathname, async (req, params) => {
-        const resOption = await matchingRoute.handler(req, params);
-        if (resOption) return resOption;
-
-        const html = await viewHandler(params);
-        return respond("<!doctype html>" + html);
-      });
-    } else {
-      handle(method, pathname, async (_req, params) => {
-        const html = await viewHandler(params);
-        return respond("<!doctype html>" + html);
-      });
-    }
+  views.forEach(([pathname, viewHandler]) => {
+    handleView(pathname, async (_req, params) => {
+      const html = await viewHandler(params);
+      return respond("<!doctype html>" + html);
+    });
   });
 
   routes.forEach(([method, pathname, routeHandler]) => {
-    handle(method, pathname, async (req, params) => {
-      const resOption = await routeHandler(req, params);
-      if (resOption) return resOption;
-      const referer = req.headers.get("Referer");
-      if (referer) {
-        const view = new URL(referer).pathname;
-        return Response.redirect(view, 301);
-      }
-      consola.error(
-        "No referer, view, or response found for route: ",
-        method,
-        pathname,
-      );
-      return new Response("Something went wrong", { status: 500 });
-    });
+    handleRoute(method, pathname, routeHandler);
   });
 
   serve(intercept);

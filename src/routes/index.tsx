@@ -12,7 +12,7 @@ const home = view("/", async () => {
       <main class="h-screen w-screen grid place-content-center text-center bg-neutral-800 text-neutral-400">
         <h1 class="text-8xl font-thin mb-6">Welcome to Core</h1>
         <p class="mb-4">A simple framework for server based web apps</p>
-        <form action="/inc" method="POST" class="space-x-2">
+        <form method="POST" class="space-x-2">
           <button
             is="count-button"
             count={0}
@@ -30,7 +30,7 @@ const home = view("/", async () => {
   );
 });
 
-const incCount = route("POST", "/inc", async () => {
+const incCount = route("POST", "/", async () => {
   await count.set((c) => c + 1);
 });
 
