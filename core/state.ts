@@ -1,6 +1,6 @@
 import { CreateStorageOptions, Storage, createStorage } from "unstorage";
 
-type Opts<T> = { initial?: T; default?: T };
+type Opts<T> = { initial?: T; default?: T; dispose?: boolean };
 type StorageValue = null | string | number | boolean | object;
 
 export class State<T extends StorageValue> {
@@ -20,6 +20,7 @@ export class State<T extends StorageValue> {
 
   async get(): Promise<T> {
     const v = await this.storage.getItem<any>(this.key);
+    if (this.opts?.dispose) await this.remove();
     return v ?? this.opts?.default;
   }
   async set(value: T | ((prev: T) => T)) {
