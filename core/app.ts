@@ -1,4 +1,4 @@
-import { handleRoute, handleView, serve, Method, Intercept } from "./server";
+import { handleRoute, handleView, serve, Method, RouteHandler } from "./server";
 import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
@@ -9,23 +9,16 @@ if (!["dev", "serve"].includes(MODE)) {
   process.exit(1);
 }
 
-type ViewHandler = (
-  params: Record<string, string>,
-) =>
-  | HtmlEscapedString
-  | Promise<HtmlEscapedString>
-  | Response
-  | Promise<Response>;
-type RouteHandler = (
+export type ViewHandler = (
   req: Request,
   params: Record<string, string>,
-) => Response | Promise<Response> | void | Promise<void>;
+) => HtmlEscapedString | Response | Promise<Response | HtmlEscapedString>;
 
 type IncludeAttr = Record<string, string> | undefined;
 
-type View = [string, ViewHandler];
-type Route = [Method, string, RouteHandler];
-type Def = { view: View; routes?: Route[] };
+export type View = [string, ViewHandler];
+export type Route = [Method, string, RouteHandler];
+export type Def = { view: View; routes?: Route[] };
 
 const included: [string, IncludeAttr][] = [];
 
@@ -43,16 +36,20 @@ export function view(pathname: string, viewHandler: ViewHandler): View {
   return [pathname, viewHandler];
 }
 
+export function noView(viewHandler: ViewHandler) {
+  return viewHandler;
+}
+
+export function define(def: Def): Def {
+  return def;
+}
+
 export function route(
   method: Method,
   pathname: string,
   routeHandler: RouteHandler,
 ): Route {
   return [method, pathname, routeHandler];
-}
-
-export function define(def: Def): Def {
-  return def;
 }
 
 function returnHtml(html: string) {
@@ -75,7 +72,10 @@ function returnHtml(html: string) {
   });
 }
 
-export async function createServer(defs: Def[]) {
+export async function createServer(
+  defs: Def[],
+  options?: { noView?: ViewHandler },
+) {
   console.log("Starting server...");
 
   const views: View[] = [];
@@ -87,8 +87,8 @@ export async function createServer(defs: Def[]) {
   }
 
   views.forEach(([pathname, viewHandler]) => {
-    handleView(pathname, async (_req, params) => {
-      const html = await viewHandler(params);
+    handleView(pathname, async (req, params) => {
+      const html = await viewHandler(req, params);
       if (html instanceof Response) return html;
       return returnHtml("<!doctype html>" + html);
     });
@@ -98,7 +98,16 @@ export async function createServer(defs: Def[]) {
     handleRoute(method, pathname, routeHandler);
   });
 
-  return (req: Request) => serve(req);
+  async function notFound(req: Request, params: Record<string, string>) {
+    if (options?.noView) {
+      const html = await options.noView(req, params);
+      if (html instanceof Response) return html;
+      return returnHtml("<!doctype html>" + html);
+    }
+    return new Response("Not Found", { status: 404 });
+  }
+
+  return (req: Request) => serve(req, notFound);
 }
 
 function shallowEqual(a: any, b: any): boolean {

@@ -6,7 +6,9 @@ type UpdateContactInput = Pick<NewContact, "name" | "email">;
 
 export const api = createApi({
   contacts: {
-    getAll: async () => db.query.contact.findMany(),
+    getAll: async () => {
+      return db.query.contact.findMany();
+    },
     getOne: async (id: number) => {
       return db.query.contact.findFirst({
         where: eq(contact.id, id),

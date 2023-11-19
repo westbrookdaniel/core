@@ -1,6 +1,7 @@
 import { view, route, define, z } from "core";
 import { memory } from "~/state";
 import { Layout } from "~/components/layout";
+import { formRoute } from "core/validation";
 
 const count = memory.newState<number>("home:count", { default: 0 });
 const greeting = memory.newState<string>("home:greet", { dispose: true });
@@ -19,10 +20,10 @@ const home = view("/", async () => {
             Welcome to Core
           </h1>
         ) : (
-          <h1 class="text-8xl font-thin mb-6">Welcome to Core</h1>
+          <h1 class="text-8xl font-thin mb-8">Welcome to Core</h1>
         )}
         <p class="mb-4">A simple framework for server based web apps</p>
-        <form method="POST" class="space-x-2 mb-32">
+        <form method="POST" class="space-x-2 mb-4">
           <button
             is="count-button"
             count={0}
@@ -46,6 +47,11 @@ const home = view("/", async () => {
             Update Greeting
           </button>
         </form>
+        <div class="mt-16">
+          <a href="/contacts" class="hover:underline">
+            Manage Contacts &rarr;
+          </a>
+        </div>
       </main>
     </Layout>
   );
@@ -55,15 +61,16 @@ const incCount = route("POST", "/", async () => {
   await count.set((c) => c + 1);
 });
 
-const greetSchema = z.object({ name: z.string() });
+const greet = formRoute(
+  "POST",
+  "/greet",
+  z.object({ name: z.string() }),
+  async (_req, _params, opt) => {
+    if (!opt.success) throw new Error("Form not valid");
 
-const greet = route("POST", "/greet", async (req) => {
-  const form = Object.fromEntries(await req.formData());
-  const opt = greetSchema.safeParse(form);
-  if (!opt.success) throw new Error("Form not valid");
-
-  await greeting.set(opt.data.name);
-});
+    await greeting.set(opt.data.name);
+  },
+);
 
 export default define({
   view: home,

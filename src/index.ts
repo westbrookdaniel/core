@@ -3,8 +3,12 @@ import { createServer, serveStatic } from "core";
 import "~/db";
 
 import home from "~/routes/index";
+import contacts from "~/routes/contacts";
+import notFound from "~/routes/notFound";
 
-const serve = await createServer([home]);
+const serve = await createServer([home, contacts], {
+  noView: notFound,
+});
 
 Bun.serve({
   async fetch(req) {

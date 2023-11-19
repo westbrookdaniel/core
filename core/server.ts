@@ -19,7 +19,7 @@ export type Handler = (
 export type RouteHandler = (
   req: Request,
   params: Record<string, string>,
-) => Promise<Response> | Response | void | Promise<void>;
+) => Response | void | Promise<void | Response>;
 
 // Map from Method to Handler (typed as string for convenience)
 const viewRouter = createRouter<{ handler: Handler }>();
@@ -45,7 +45,7 @@ export function handleRoute(
   m.handlers[method] = handler;
 }
 
-export async function serve(req: Request) {
+export async function serve(req: Request, notFound: Handler) {
   const pathname = new URL(req.url).pathname;
   const msg = `${req.method.padEnd(7)} ${pathname}`;
   console.time(msg);
@@ -70,5 +70,5 @@ export async function serve(req: Request) {
     return Response.redirect(view, 301);
   }
 
-  return new Response("Not Found", { status: 404 });
+  return notFound(req, {});
 }
