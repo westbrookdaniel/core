@@ -5,7 +5,7 @@ import { api } from "~/api";
 import { CreateContactsForm } from "~/components/CreateContactsForm";
 
 const contacts = view("/contacts", async () => {
-  const c = await api.contacts.getAll();
+  const c = await api.contacts.all();
 
   if (c.error) throw new Error(c.error);
 
