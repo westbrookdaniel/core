@@ -5,7 +5,7 @@ import { api } from "~/layers/api";
 import { CreateContactsForm } from "~/components/CreateContactsForm";
 
 const contacts = view("/contacts", async () => {
-  const c = await api.contacts.all();
+  const c = await api.contact.all();
 
   if (c.error) throw new Error(c.error);
 
@@ -65,14 +65,14 @@ const addContact = formRoute(
         />
       );
     }
-    await api.contacts.create(opt.data);
+    await api.contact.create(opt.data);
     return Response.redirect("/contacts");
   },
 );
 
 const deleteContact = route("DELETE", "/contacts/:id", async (_req, params) => {
   if (!params.id) throw new Error("Something went wrong");
-  await api.contacts.delete(parseInt(params.id));
+  await api.contact.delete(parseInt(params.id));
 });
 
 export default define({

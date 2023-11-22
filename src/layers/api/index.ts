@@ -1,6 +1,6 @@
 import { createLayer } from "core";
-import { contacts } from "./contacts";
+import { contactLayer } from "./contact";
 
 export const api = createLayer({
-  contacts,
+  contact: contactLayer,
 });
