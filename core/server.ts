@@ -17,18 +17,14 @@ export type Handler = (
   params: Record<string, string>,
 ) => Promise<Response> | Response;
 
-export type RouteHandler = (
+export type OptionalHandler = (
   req: Request,
   params: Record<string, string>,
-) =>
-  | Response
-  | void
-  | HtmlEscapedString
-  | Promise<void | Response | HtmlEscapedString>;
+) => Response | void | Promise<void | Response>;
 
 // Map from Method to Handler (typed as string for convenience)
 const viewRouter = createRouter<{ handler: Handler }>();
-const router = createRouter<{ handlers: Record<string, RouteHandler> }>();
+const router = createRouter<{ handlers: Record<string, OptionalHandler> }>();
 
 export function matchRoute(pathname: string, method: string) {
   const m = router.lookup(pathname);
@@ -43,14 +39,17 @@ export function handleView(pathname: string, handler: Handler) {
 export function handleRoute(
   method: Method,
   pathname: string,
-  handler: RouteHandler,
+  handler: OptionalHandler,
 ) {
   const m = router.lookup(pathname);
   if (!m) return router.insert(pathname, { handlers: { [method]: handler } });
   m.handlers[method] = handler;
 }
 
-export async function serve(req: Request, notFound: Handler) {
+export async function serve(
+  req: Request,
+  notFound: Handler,
+): Promise<Response> {
   const pathname = new URL(req.url).pathname;
   const msg = `${req.method.padEnd(7)} ${pathname}`;
   console.time(msg);

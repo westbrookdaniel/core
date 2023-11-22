@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Method, RouteHandler } from "./server";
-import { Route } from "./app";
+import { Method } from "./server";
+import { Route, RouteHandler } from "./app";
 import { HtmlEscapedString } from "./jsx/utils";
 
 type FormRouteHandler<I, O> = (

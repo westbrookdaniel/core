@@ -1,5 +1,5 @@
 import { noView } from "core";
-import { Layout } from "~/components/layout";
+import { Layout } from "~/components/Layout";
 
 const notFound = noView(async () => {
   return (

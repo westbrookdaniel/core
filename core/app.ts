@@ -1,4 +1,4 @@
-import { handleRoute, handleView, serve, Method, RouteHandler } from "./server";
+import { handleRoute, handleView, serve, Method } from "./server";
 import { HtmlEscapedString } from "./jsx/utils";
 
 const [_, __, modeArg] = process.argv;
@@ -13,6 +13,15 @@ export type ViewHandler = (
   req: Request,
   params: Record<string, string>,
 ) => HtmlEscapedString | Response | Promise<Response | HtmlEscapedString>;
+
+export type RouteHandler = (
+  req: Request,
+  params: Record<string, string>,
+) =>
+  | HtmlEscapedString
+  | Response
+  | void
+  | Promise<Response | HtmlEscapedString | void>;
 
 type IncludeAttr = Record<string, string> | undefined;
 
