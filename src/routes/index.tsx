@@ -1,29 +1,19 @@
 import { view, route, define, z } from "core";
 import { memory } from "~/state";
-import { Layout } from "~/components/layout";
+import { Layout } from "~/components/Layout";
 import { formRoute } from "core/validation";
 
 const count = memory.newState<number>("home:count", { default: 0 });
-const greeting = memory.newState<string>("home:greet", { dispose: true });
 
 const home = view("/", async () => {
   const c = await count.get();
-  const g = await greeting.get();
 
   return (
     <Layout>
       <main class="h-screen w-screen grid place-content-center text-center bg-neutral-800 text-neutral-400">
-        {!!g ? (
-          <h1 class="text-8xl font-thin mb-6">
-            Hey {g},
-            <br />
-            Welcome to Core
-          </h1>
-        ) : (
-          <h1 class="text-8xl font-thin mb-8">Welcome to Core</h1>
-        )}
+        <h1 class="text-8xl font-thin mb-8">Welcome to Core</h1>
         <p class="mb-4">A simple framework for server based web apps</p>
-        <form method="POST" class="space-x-2 mb-4">
+        <div class="flex justify-center space-x-2 mb-4">
           <button
             is="count-button"
             count={0}
@@ -32,11 +22,13 @@ const home = view("/", async () => {
           >
             Client Count 0
           </button>
-          <button class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500">
-            Server Count {c.toString()}
-          </button>
-        </form>
-        <form action="/greet" method="POST" class="space-x-2">
+          <form hx-post="/">
+            <button class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500">
+              Server Count {c.toString()}
+            </button>
+          </form>
+        </div>
+        <form hx-post="/greet" hx-target="h1" class="space-x-2">
           <input
             type="text"
             name="name"
@@ -59,6 +51,13 @@ const home = view("/", async () => {
 
 const incCount = route("POST", "/", async () => {
   await count.set((c) => c + 1);
+  const c = await count.get();
+
+  return (
+    <button class="bg-neutral-700 py-2 px-4 rounded-full hover:bg-neutral-600 focus:bg-neutral-500">
+      Server Count {c.toString()}
+    </button>
+  );
 });
 
 const greet = formRoute(
@@ -67,8 +66,14 @@ const greet = formRoute(
   z.object({ name: z.string() }),
   async (_req, _params, opt) => {
     if (!opt.success) throw new Error("Form not valid");
-
-    await greeting.set(opt.data.name);
+    if (!opt.data.name) return <>Welcome to Core</>;
+    return (
+      <>
+        Hey {opt.data.name},
+        <br />
+        Welcome to Core
+      </>
+    );
   },
 );
 

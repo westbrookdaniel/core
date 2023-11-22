@@ -1,4 +1,5 @@
 import { createRouter } from "radix3";
+import { HtmlEscapedString } from "./jsx/utils";
 
 export type Method =
   | "GET"
@@ -19,7 +20,11 @@ export type Handler = (
 export type RouteHandler = (
   req: Request,
   params: Record<string, string>,
-) => Response | void | Promise<void | Response>;
+) =>
+  | Response
+  | void
+  | HtmlEscapedString
+  | Promise<void | Response | HtmlEscapedString>;
 
 // Map from Method to Handler (typed as string for convenience)
 const viewRouter = createRouter<{ handler: Handler }>();
@@ -67,7 +72,7 @@ export async function serve(req: Request, notFound: Handler) {
   const referer = req.headers.get("Referer");
   if (referer) {
     const view = new URL(referer).pathname;
-    return Response.redirect(view, 301);
+    return Response.redirect(view);
   }
 
   return notFound(req, {});

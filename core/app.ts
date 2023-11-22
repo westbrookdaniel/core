@@ -95,7 +95,11 @@ export async function createServer(
   });
 
   routes.forEach(([method, pathname, routeHandler]) => {
-    handleRoute(method, pathname, routeHandler);
+    handleRoute(method, pathname, async (req, params) => {
+      const html = await routeHandler(req, params);
+      if (html instanceof Response) return html;
+      if (html) return returnHtml("<!doctype html>" + html);
+    });
   });
 
   async function notFound(req: Request, params: Record<string, string>) {

@@ -1,13 +1,18 @@
 import { z } from "zod";
 import { Method, RouteHandler } from "./server";
 import { Route } from "./app";
+import { HtmlEscapedString } from "./jsx/utils";
 
 type FormRouteHandler<I, O> = (
   req: Request,
   params: Record<string, string>,
   opt: z.SafeParseReturnType<I, O>,
   raw: Record<string, any>,
-) => Response | Promise<Response> | void | Promise<void>;
+) =>
+  | Response
+  | void
+  | HtmlEscapedString
+  | Promise<Response | void | HtmlEscapedString>;
 
 export function formRoute<I>(
   method: Method,
