@@ -1,10 +1,10 @@
-import { view, define, z, route } from "core";
+import { registerView, define, z, route } from "core";
 import { Layout } from "~/components/Layout";
 import { formRoute } from "core/validation";
 import { api } from "~/api";
 import { CreateContactsForm } from "~/components/CreateContactsForm";
 
-const contacts = view("/contacts", async () => {
+const contacts = registerView("/contacts", async () => {
   const c = await api.contacts.all();
 
   if (c.error) throw new Error(c.error);

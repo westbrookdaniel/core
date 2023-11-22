@@ -1,10 +1,10 @@
 import { createServer, serveStatic } from "core";
 
-import "~/db";
+import "~/layers/db";
 
-import home from "~/routes/index";
-import contacts from "~/routes/contacts";
-import notFound from "~/routes/notFound";
+import home from "~/views/index";
+import contacts from "~/views/contacts";
+import notFound from "~/views/notFound";
 
 const serve = await createServer([home, contacts], {
   noView: notFound,

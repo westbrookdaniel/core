@@ -1,7 +1,6 @@
-import { noView } from "core";
 import { Layout } from "~/components/Layout";
 
-const notFound = noView(async () => {
+export default async function notFound() {
   return (
     <Layout>
       <main class="h-screen w-screen grid place-content-center text-center bg-neutral-800 text-neutral-400">
@@ -9,6 +8,4 @@ const notFound = noView(async () => {
       </main>
     </Layout>
   );
-});
-
-export default notFound
+}

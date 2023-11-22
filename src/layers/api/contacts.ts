@@ -1,4 +1,4 @@
-import { Contact, NewContact, contact, db, eq } from "~/db";
+import { Contact, NewContact, contact, db, eq } from "~/layers/db/index";
 
 type CreateContactInput = Pick<Contact, "name" | "email">;
 type UpdateContactInput = Pick<NewContact, "name" | "email">;

@@ -45,10 +45,6 @@ export function view(pathname: string, viewHandler: ViewHandler): View {
   return [pathname, viewHandler];
 }
 
-export function noView(viewHandler: ViewHandler) {
-  return viewHandler;
-}
-
 export function define(def: Def): Def {
   return def;
 }
