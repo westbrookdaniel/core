@@ -1,84 +1,47 @@
-# core
+# Core
 
-Bun typescript framework/template built for creating rest style apps.
+This is a framework/template for building Bun/Typescript server first apps.
+It follows the philosophies of:
 
-Notably it includes the entire source for the framework in the
-`core` directory. It's a quite a light framework, but packed with
-a utilities and patterns for making rapid app development easier,
-especially with frameworks like htmx.
+- [REST](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
+- UI first (rather than model first, views are central to the app)
+- Hackable (framework code lives in the repo)
 
-It isn't fully integrated with a frontend solution by design,
-but it does included some utilities for making web components easier
-and compiling client javascript. With the core being extensible
-you can also adapt the framework to your needs over time.
+This framework gives you a good starter for building apps quickly with an MVC
+like structure. While nothing is required and you can shape the project to your desires
+we scaffold the framework with some libraries that we thing are best suited for
+our approach; [htmx](https://htmx.org/), [Drizzle](https://orm.drizzle.team/), [tailwindcss](https://tailwindcss.com/), and a few more.
 
-## Views and Routes
+Core also provides a jsx solution that is tweakable inside the `core` folder which is suited for serverside rendering with libraries like htmx.
 
-Being a configuration over convention framework, it's easier to
-find how something works and adjust it.
+## Routes and Views
 
-The main concepts to be familar with are views and routes. Views are can only ever respond to GET requests, but routes can respond to any request. Defined like so:
+The main notable difference is the layered router. By default (configurable by hacking the internals) the router has 2 layers, view and route. How layers work if a request path + method matches in a router layer it's handler will be called. If a response is returned (either jsx or Response) it will be sent to the user, but if the return is falsy, the request will fallthrough to the next layer. You can see examples of this in the starter routes. If there is nothing returned from any layer, the router will attempt to look at the Referer header and do a 303 (GET) redirect that router.
 
-```tsx
-import { view, route, define } from "core";
+## Getting started
 
-// Route path matching is handled by radix3
-const home = view("/", async (req, params) => {
-  // We provide our own jsx solution (based on hono/jsx)
-  return <h1>Hello World</h1>;
-});
+Start by installing dependencies and starting the dev server:
 
-const route = route("POST", "/", async () => {
-  console.log("Post to /");
-});
-
-export default define({
-  view: home,
-  routes: [route],
-});
+```sh
+bun install
+bun db:up # starts db, requires docker
+bun dev
 ```
 
-and registered in the entry point: (what you run with `bun --watch run ...`)
-
-```tsx
-import { createServer } from "core";
-
-import routeDef from "~/routes/path/to/route";
-
-const serve = await createServer([routeDef]);
-
-Bun.serve({
-  async fetch(req) {
-    return serve(req);
-  },
-});
-```
-
-Once the request reaches the internal server it is handled in this order: `Route -> View`. If you don't `return` in a route, after the route is completed the view will displayed, and if no view exists for that route we will attempt to redirect to the referrer.
-
-This allows you to easily utilise html forms for posting data to the server. In order to transfer data back to the client, we can update the "model" in an mvc fashion. We can either use an api to save to the database and have the view read it, or we can use our utility `createState` to create an store powered by unstorage which by default is stored in server memory (in a Map to be precise) but it can be changed to use something like redis.
-
-Thanks to the referrer redirect system, we can call multiple different routes from a single view without any need for any javascript (by default html forms refresh the page on submit)
-
-## Utilities
-
-This is a short list main of the utilities included:
-
-- createState (wrapper of unstorage)
-- createApi (object based api with error/data result type)
-- jsx (while views can return a Response, it's recommended to use jsx)
-- serveStatic (will serve a directory)
-
-## Recomendations
-
-While there is no convention, I would recommend organsing your
-specific code like so:
+You can find the views and routes co-located in the routes folder, these will
+be automatically imported. Here are some other notable folders:
 
 ```md
+- core (the frameowork code)
+- drizzle (db migrations live here)
+- public (will be served statically)
 - src
-  - api
-  - routes
-  - components
+  - api (abstraction for data access for reusability and auditing)
+  - components (components for your routes)
+  - db (drizzle client and schema)
+  - routes (views/routes live here)
+    state.ts (features unstorage stores, useful for caching)
+    styles.css (will be built to public/styles.css by tailwindcss)
 ```
 
-Use drizzle (as well as unstorage), it's pretty good.
+Happy hacking!
