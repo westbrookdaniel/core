@@ -20,6 +20,12 @@ The main notable difference is the layered router. By default (configurable by h
 
 ## Getting started
 
+Ensure you have [bun](https://bun.sh/) installed, then run:
+
+```
+bunx degit westbrookdaniel/core my-project
+```
+
 Start by installing dependencies and starting the dev server:
 
 ```sh
