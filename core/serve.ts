@@ -3,9 +3,12 @@ import { globSync } from "glob";
 
 import "~/db";
 
-globSync("~/routes/**/*").forEach((path) => {
-  import(path);
-});
+const files = globSync("./src/routes/**/*");
+
+for (let i = 0; i < files.length; i++) {
+  const file = files[i];
+  await import(file);
+}
 
 Bun.serve({
   async fetch(req) {
