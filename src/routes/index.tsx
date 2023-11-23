@@ -1,11 +1,10 @@
-import { view, route, define, z } from "core";
+import { z, validate, router } from "core";
 import { memory } from "~/layers/state";
 import { Layout } from "~/components/Layout";
-import { formRoute } from "core/validation";
 
 const count = memory.newState<number>("home:count", { default: 0 });
 
-const home = view("/", async () => {
+router.view.GET("/", async () => {
   const c = await count.get();
 
   return (
@@ -49,7 +48,7 @@ const home = view("/", async () => {
   );
 });
 
-const incCount = route("POST", "/", async () => {
+router.route.POST("/", async () => {
   await count.set((c) => c + 1);
   const c = await count.get();
 
@@ -60,24 +59,19 @@ const incCount = route("POST", "/", async () => {
   );
 });
 
-const greet = formRoute(
-  "POST",
-  "/greet",
-  z.object({ name: z.string() }),
-  async (_req, _params, opt) => {
-    if (!opt.success) throw new Error("Form not valid");
-    if (!opt.data.name) return <>Welcome to Core</>;
-    return (
-      <>
-        Hey {opt.data.name},
-        <br />
-        Welcome to Core
-      </>
-    );
-  },
-);
+router.route.POST("/greet", async (req) => {
+  const { parsed } = await validate(
+    await req.formData(),
+    z.object({ name: z.string() }),
+  );
 
-export default define({
-  view: home,
-  routes: [incCount, greet],
+  if (!parsed.success) throw new Error("Form not valid");
+  if (!parsed.data.name) return <>Welcome to Core</>;
+  return (
+    <>
+      Hey {parsed.data.name},
+      <br />
+      Welcome to Core
+    </>
+  );
 });

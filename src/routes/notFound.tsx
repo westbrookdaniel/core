@@ -1,6 +1,7 @@
 import { Layout } from "~/components/Layout";
+import { router } from "~/router";
 
-export default async function notFound() {
+router.notFound(() => {
   return (
     <Layout>
       <main class="h-screen w-screen grid place-content-center text-center bg-neutral-800 text-neutral-400">
@@ -8,4 +9,4 @@ export default async function notFound() {
       </main>
     </Layout>
   );
-}
+});

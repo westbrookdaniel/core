@@ -1,16 +1,4 @@
 import { createRouter } from "radix3";
-import { HtmlEscapedString } from "./jsx/utils";
-
-export type Method =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  | "PATCH"
-  | "HEAD"
-  | "OPTIONS"
-  | "CONNECT"
-  | "TRACE";
 
 export type Handler = (
   req: Request,

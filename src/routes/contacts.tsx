@@ -1,10 +1,9 @@
-import { view, define, z, route } from "core";
+import { z, router, validate } from "core";
 import { Layout } from "~/components/Layout";
-import { formRoute } from "core/validation";
 import { api } from "~/layers/api";
 import { CreateContactsForm } from "~/components/CreateContactsForm";
 
-const contacts = view("/contacts", async () => {
+router.view.GET("/contacts", async () => {
   const c = await api.contact.all();
 
   if (c.error) throw new Error(c.error);
@@ -49,33 +48,28 @@ const contacts = view("/contacts", async () => {
   );
 });
 
-const addContact = formRoute(
-  "POST",
-  "/contacts",
-  z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().min(1, "Email is required").email("Email is invalid"),
-  }),
-  async (_req, _params, opt, raw) => {
-    if (!opt.success) {
-      return (
-        <CreateContactsForm
-          errors={opt.error.flatten().fieldErrors}
-          fields={raw}
-        />
-      );
-    }
-    await api.contact.create(opt.data);
-    return Response.redirect("/contacts");
-  },
-);
+router.route.POST("/contacts", async (req) => {
+  const { parsed, raw } = await validate(
+    await req.formData(),
+    z.object({
+      name: z.string().min(1, "Name is required"),
+      email: z.string().min(1, "Email is required").email("Email is invalid"),
+    }),
+  );
 
-const deleteContact = route("DELETE", "/contacts/:id", async (_req, params) => {
-  if (!params.id) throw new Error("Something went wrong");
-  await api.contact.delete(parseInt(params.id));
+  if (!parsed.success) {
+    return (
+      <CreateContactsForm
+        errors={parsed.error.flatten().fieldErrors}
+        fields={raw}
+      />
+    );
+  }
+  await api.contact.create(parsed.data);
+  return Response.redirect("/contacts");
 });
 
-export default define({
-  view: contacts,
-  routes: [addContact, deleteContact],
+router.route.DELETE("/contacts/:id", async (_req, params) => {
+  if (!params.id) throw new Error("Something went wrong");
+  await api.contact.delete(parseInt(params.id));
 });

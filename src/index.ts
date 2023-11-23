@@ -1,28 +1,28 @@
-import { createServer, serveStatic } from "core";
+import { serveDir, serve } from "core";
 
 import "~/layers/db";
 
-import home from "~/views/index";
-import contacts from "~/views/contacts";
-import notFound from "~/views/notFound";
-
-const serve = await createServer([home, contacts], {
-  noView: notFound,
-});
+import "~/routes/notFound";
+import "~/routes/index";
+import "~/routes/contacts";
 
 Bun.serve({
   async fetch(req) {
-    const build = serveStatic(req, /^\/_static/, (p) =>
-      p.replace("_static", "build"),
-    );
+    const pathname = new URL(req.url).pathname;
 
-    if (build) return build;
+    if (pathname.startsWith("/_static")) {
+      return serveDir(req, {
+        root: "build",
+        removePrefix: "/_static",
+      });
+    }
 
-    const pub = serveStatic(req, /^\/_public/, (p) =>
-      p.replace("_public", "public"),
-    );
-
-    if (pub) return pub;
+    if (pathname.startsWith("/_public")) {
+      return serveDir(req, {
+        root: "public",
+        removePrefix: "/_public",
+      });
+    }
 
     return serve(req);
   },
