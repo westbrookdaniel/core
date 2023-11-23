@@ -104,7 +104,8 @@ function createRouter<T extends string>(layers: T[]): CreateRouterReturn<T> {
     const referer = req.headers.get("Referer");
     if (referer) {
       const view = new URL(referer).pathname;
-      return Response.redirect(view);
+      // 303 See Other (do redirect as GET)
+      return Response.redirect(view, 303);
     }
 
     if (notFound) {

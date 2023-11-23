@@ -1,5 +1,5 @@
+import { router } from "core";
 import { Layout } from "~/components/Layout";
-import { router } from "~/router";
 
 router.notFound(() => {
   return (
