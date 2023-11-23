@@ -1,7 +1,7 @@
 import { z, router, validate } from "core";
 import { Layout } from "~/components/Layout";
 import { api } from "~/api";
-import { CreateContactsForm } from "~/components/CreateContactsForm";
+import { CreateContactsForm } from "~/components/contacts/CreateContactsForm";
 
 router.view.GET("/contacts", async () => {
   const c = await api.contact.all();
