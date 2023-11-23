@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "conc \"bun run dev:*\"",
-    "dev:server": "bun --watch run src/index.ts",
+    "dev:server": "bun --watch run core/serve.ts",
     "dev:styles": "tailwindcss -i src/styles.css -o build/styles.css --watch",
-    "serve": "bun run src/index.ts serve",
+    "serve": "bun run core/serve.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down"
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.29.0",
+    "glob": "^10.3.10",
     "postgres": "^3.4.3",
     "radix3": "^1.1.0",
     "unstorage": "^1.10.1",

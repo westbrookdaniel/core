@@ -9,7 +9,6 @@ const sql = postgres(connectionString, { max: 1 });
 
 export const db = drizzle(sql, { schema });
 
-export * from "drizzle-orm";
-export * from "~/db/schema";
+export * as schema from "~/db/schema";
 
 await migrate(db, { migrationsFolder: "drizzle" });

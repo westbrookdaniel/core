@@ -1,34 +1,35 @@
-import { Contact, NewContact, contact, db, eq } from "~/db";
+import { schema, db } from "~/db";
+import { eq } from "drizzle-orm";
 
-type CreateContactInput = Pick<Contact, "name" | "email">;
-type UpdateContactInput = Pick<NewContact, "name" | "email">;
+type CreateContactInput = Pick<schema.Contact, "name" | "email">;
+type UpdateContactInput = Pick<schema.NewContact, "name" | "email">;
 
-export const _contact = {
+export const contact = {
   all: async () => {
     return db.query.contact.findMany();
   },
   one: async (id: number) => {
     return db.query.contact.findFirst({
-      where: eq(contact.id, id),
+      where: eq(schema.contact.id, id),
     });
   },
   create: async (input: CreateContactInput) => {
-    const newContacts: Contact[] = await db
-      .insert(contact)
+    const newContacts: schema.Contact[] = await db
+      .insert(schema.contact)
       .values({ ...input, updatedAt: new Date() })
       .returning();
     return newContacts[0];
   },
   update: async (id: number, input: UpdateContactInput) => {
-    const newContacts: Contact[] = await db
-      .update(contact)
+    const newContacts: schema.Contact[] = await db
+      .update(schema.contact)
       .set({ ...input, updatedAt: new Date() })
-      .where(eq(contact.id, id))
+      .where(eq(schema.contact.id, id))
       .returning();
     return newContacts[0];
   },
   delete: async (id: number) => {
-    await db.delete(contact).where(eq(contact.id, id));
+    await db.delete(schema.contact).where(eq(schema.contact.id, id));
     return { id };
   },
 };

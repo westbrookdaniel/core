@@ -1,10 +1,11 @@
-import { serveDir, serve } from "core";
+import { serve, serveDir } from "./internal";
+import { globSync } from "glob";
 
 import "~/db";
 
-import "~/routes/notFound";
-import "~/routes/index";
-import "~/routes/contacts";
+globSync("~/routes/**/*").forEach((path) => {
+  import(path);
+});
 
 Bun.serve({
   async fetch(req) {
