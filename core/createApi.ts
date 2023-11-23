@@ -1,21 +1,21 @@
-type LayerInput = {
-  [key: string]: ((...args: any[]) => Promise<any>) | LayerInput;
+type ApiInut = {
+  [key: string]: ((...args: any[]) => Promise<any>) | ApiInut;
 };
 
 export type Result<T> =
   | { data: T; error?: undefined }
   | { data?: undefined; error: any };
 
-type Layer<T> = {
+type Api<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => Promise<any>
     ? (...args: Parameters<T[K]>) => Promise<Result<Awaited<ReturnType<T[K]>>>>
-    : Layer<T[K]>;
+    : Api<T[K]>;
 };
 
-export function createLayer<T extends LayerInput>(layerInput: T): Layer<T> {
-  const layer: any = {};
+export function createApi<T extends ApiInut>(layerInput: T): Api<T> {
+  const api: any = {};
   Object.entries(layerInput).forEach(([key, value]) => {
-    layer[key] = Object.entries(value).reduce((acc: any, [key, value]) => {
+    api[key] = Object.entries(value).reduce((acc: any, [key, value]) => {
       acc[key] = async (...args: any[]) => {
         try {
           const data = await value(...args);
@@ -27,5 +27,5 @@ export function createLayer<T extends LayerInput>(layerInput: T): Layer<T> {
       return acc;
     }, {});
   });
-  return layer;
+  return api;
 }

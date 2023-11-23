@@ -1,9 +1,9 @@
-import { Contact, NewContact, contact, db, eq } from "~/layers/db/index";
+import { Contact, NewContact, contact, db, eq } from "~/db";
 
 type CreateContactInput = Pick<Contact, "name" | "email">;
 type UpdateContactInput = Pick<NewContact, "name" | "email">;
 
-export const contactLayer = {
+export const _contact = {
   all: async () => {
     return db.query.contact.findMany();
   },

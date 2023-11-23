@@ -1,5 +1,5 @@
 import { z, validate, router } from "core";
-import { memory } from "~/layers/state";
+import { memory } from "~/state";
 import { Layout } from "~/components/Layout";
 
 const count = memory.newState<number>("home:count", { default: 0 });

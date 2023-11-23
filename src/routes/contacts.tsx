@@ -1,6 +1,6 @@
 import { z, router, validate } from "core";
 import { Layout } from "~/components/Layout";
-import { api } from "~/layers/api";
+import { api } from "~/api";
 import { CreateContactsForm } from "~/components/CreateContactsForm";
 
 router.view.GET("/contacts", async () => {

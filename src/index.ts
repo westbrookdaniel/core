@@ -1,6 +1,6 @@
 import { serveDir, serve } from "core";
 
-import "~/layers/db";
+import "~/db";
 
 import "~/routes/notFound";
 import "~/routes/index";
