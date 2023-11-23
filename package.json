@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "conc \"bun run dev:*\"",
     "dev:server": "bun --watch run core/serve.ts",
-    "dev:styles": "tailwindcss -i src/styles.css -o build/styles.css --watch",
+    "dev:styles": "tailwindcss -i src/styles.css -o public/styles.css --watch",
     "serve": "bun run core/serve.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:up": "docker-compose up -d",

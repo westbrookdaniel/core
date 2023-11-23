@@ -2,7 +2,7 @@
 
 .env 
 postgres-data
-build/styles.css
+public/styles.css
 
 # Logs
 
